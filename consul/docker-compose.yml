@@ -1,0 +1,49 @@
+version: "3.3"
+services:
+  consul_server:
+    container_name: consul_server
+    image: consul
+    ports:
+      - 8500:8500
+    command: agent -dev -ui -client=0.0.0.0 -dns-port=53 -recursor=8.8.8.8 -node=consul-agent-1
+    environment:
+      - CONSUL_ALLOW_PRIVILEGED_PORTS=true
+
+  registrator:
+    build: ./registrator
+    command: "consul://consul_server:8500"
+    container_name: registrator
+    depends_on:
+    - consul_server
+    volumes:
+    - /var/run/docker.sock:/tmp/docker.sock
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul_server:8500
+
+  #  dig consul_counting_service-9002.service.consul SRV
+  counting_service:
+    container_name: counting_service
+    build: ./counting
+    depends_on:
+    - registrator
+    ports:
+      - 9002:9002
+    environment:
+      - PORT=9002
+      - SERVICE_9002_CHECK_HTTP=/
+      - CONSUL_HTTP_ADDR=http://consul_server:8500
+      - SERVICE_9002_NAME=counting_service
+      - SERVICE_9002_ID=vulcan.counting_service
+      - SERVICE_TAGS=ecomm,sdc
+
+
+  #dashboard_service:
+    #container_name: dashboard_service
+    #build:  ./dashboard
+    #depends_on:
+    #- registrator
+    #ports:
+      #- 9003:9003
+    #environment:
+      #- PORT=9003
+      #- COUNTING_SERVICE_URL=http://counting_service:9002
