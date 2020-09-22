@@ -5,7 +5,7 @@ services:
     image: consul
     ports:
       - 8500:8500
-    command: agent -dev -ui -client=0.0.0.0 -dns-port=53 -recursor=8.8.8.8 -node=consul-agent-1
+    command: agent -dev -ui -client=0.0.0.0 -dns-port=53 -recursor=127.0.0.11 -node=consul-agent-1
     environment:
       - CONSUL_ALLOW_PRIVILEGED_PORTS=true
 
@@ -37,13 +37,18 @@ services:
       - SERVICE_TAGS=ecomm,sdc
 
 
-  #dashboard_service:
-    #container_name: dashboard_service
-    #build:  ./dashboard
-    #depends_on:
-    #- registrator
-    #ports:
-      #- 9003:9003
-    #environment:
-      #- PORT=9003
-      #- COUNTING_SERVICE_URL=http://counting_service:9002
+  dashboard_service:
+    container_name: dashboard_service
+    build:  ./dashboard
+    depends_on:
+    - registrator
+    ports:
+      - 9003:9003
+    environment:
+      - PORT=9003
+      - COUNTING_SERVICE_URL=http://counting_service.service.consul:9002
+      - SERVICE_9003_CHECK_HTTP=/
+      - CONSUL_HTTP_ADDR=http://consul_server:8500
+      - SERVICE_9003_NAME=dashboard_service
+      - SERVICE_9003_ID=vulcan.dashboard_service
+      - SERVICE_TAGS=vulcan,sdc
