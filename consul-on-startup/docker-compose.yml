@@ -1,0 +1,48 @@
+version: "3.3"
+services:
+  consul_server:
+    container_name: consul_server
+    image: consul
+    ports:
+      - 8500:8500
+    command: agent -dev -ui -client=0.0.0.0 -dns-port=53 -recursor=127.0.0.11 -node=consul-agent-1
+    environment:
+      - CONSUL_ALLOW_PRIVILEGED_PORTS=true
+
+  #  dig consul_counting_service-9002.service.consul SRV
+  counting_service:
+    container_name: counting_service
+    depends_on:
+      - consul_server
+    build: ./counting
+    ports:
+      - 9002:9002
+    environment:
+      - PORT=9002
+      - CONSUL_HTTP_ADDR=http://consul_server:8500
+
+  counting_proxy:
+    container_name: counting_proxy
+    command: connect proxy -sidecar-for counting
+    depends_on:
+      - consul_server
+      - counting_service
+    #image: envoyproxy/envoy-alpine:v1.14-latest
+    image: consul
+    ports:
+      - 21001:21001
+    environment:
+      - CONSUL_HTTP_ADDR=http://consul_server:8500
+
+  dashboard_service:
+    container_name: dashboard_service
+    depends_on:
+      - consul_server
+    build:  ./dashboard
+    ports:
+      - 9003:9003
+      - 20000:20000
+    environment:
+      - PORT=9003
+      - COUNTING_SERVICE_URL=http://counting_service.service.consul:9002
+      - CONSUL_HTTP_ADDR=http://consul_server:8500
