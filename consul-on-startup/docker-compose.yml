@@ -21,18 +21,18 @@ services:
       - PORT=9002
       - CONSUL_HTTP_ADDR=http://consul_server:8500
 
-  counting_proxy:
-    container_name: counting_proxy
-    command: connect proxy -sidecar-for counting
-    depends_on:
-      - consul_server
-      - counting_service
-    #image: envoyproxy/envoy-alpine:v1.14-latest
-    image: consul
-    ports:
-      - 21001:21001
-    environment:
-      - CONSUL_HTTP_ADDR=http://consul_server:8500
+  #counting_proxy:
+    #container_name: counting_proxy
+    #command: connect proxy -sidecar-for counting
+    #depends_on:
+      #- consul_server
+      #- counting_service
+    ##image: envoyproxy/envoy-alpine:v1.14-latest
+    #image: consul
+    #ports:
+      #- 21001:21001
+    #environment:
+      #- CONSUL_HTTP_ADDR=http://consul_server:8500
 
   dashboard_service:
     container_name: dashboard_service

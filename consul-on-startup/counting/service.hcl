@@ -5,7 +5,8 @@ service {
   port = 9002
 
   connect {
-    sidecar_service {}
+    sidecar_service {
+    }
   }
 
   check {
