@@ -30,7 +30,7 @@ services:
       - 9002:9002
     environment:
       - PORT=9002
-      - SERVICE_9002_CHECK_HTTP=/
+      - SERVICE_9002_CHECK_HTTP=/health
       - CONSUL_HTTP_ADDR=http://consul_server:8500
       - SERVICE_9002_NAME=counting_service
       - SERVICE_9002_ID=vulcan.counting_service
@@ -47,7 +47,7 @@ services:
     environment:
       - PORT=9003
       - COUNTING_SERVICE_URL=http://counting_service.service.consul:9002
-      - SERVICE_9003_CHECK_HTTP=/
+      - SERVICE_9003_CHECK_HTTP=/health
       - CONSUL_HTTP_ADDR=http://consul_server:8500
       - SERVICE_9003_NAME=dashboard_service
       - SERVICE_9003_ID=vulcan.dashboard_service
